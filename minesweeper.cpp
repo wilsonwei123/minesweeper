@@ -5,15 +5,35 @@
 
 using namespace std;
 
-int num_uncovered = 0;
+int num_uncovered = 0, difficulty;
+
+void instructions() {
+    cout << "Welcome to Minesweeper!\n\n";
+    cout << "Game Instructions:\n";
+    cout << "1. The grid consists of tiles, some of which contain mines ('m') and others are empty.\n";
+    cout << "2. Your goal is to uncover all the tiles that don't contain mines.\n";
+    cout << "3. The numbers on uncovered tiles represent how many mines are adjacent to that tile (including diagonals).\n";
+    cout << "4. You can uncover a tile by entering its coordinates.\n";
+    cout << "5. If you uncover a tile with a mine, you lose the game!\n\n";
+    cout << "Flagging:\n";
+    cout << "1. If you think a tile contains a mine, you can flag it to mark it.\n";
+    cout << "2. Flags are a way to keep track of tiles you suspect contain mines.\n";
+    cout << "3. You cannot uncover a flagged tile unless you remove the flag.\n\n";
+    cout << "Game controls:\n";
+    cout << "1. Use the coordinates (the letters 'uc'followed by row and column) to uncover tiles.\n";
+    cout << "2. To flag or unflag a tile, use 'fl' followed by coordinates.\n";
+    cout << "3. To win, uncover all non-mine tiles. The game ends if you uncover a mine (or, of course, if you win).\n\n";
+}
 
 void display_grid(vector<vector<char> > &grid, vector<vector<int> > &uncovered) {
     for (int i = 0; i < grid.size(); i++) {
         for (int j = 0; j < grid[0].size(); j++) {
             if (uncovered[i][j] == 1) {
                 cout << grid[i][j] << " ";
+            } else if (uncovered[i][j] == 3) {
+                cout << "F" << " ";
             } else {
-                cout << '#' << " ";
+                cout << "#" << " ";
             }
         }
 
@@ -21,13 +41,42 @@ void display_grid(vector<vector<char> > &grid, vector<vector<int> > &uncovered) 
     }
 }
 
-void setup(vector<vector<char> >& grid, vector<vector<int> >& uncovered) {
+void setup(vector<vector<char> >& grid, vector<vector<int> >& uncovered, int difficulty) {
     for (int i = 0; i < grid.size(); i++) {
         for (int j = 0; j < grid[0].size(); j++) {
-            if ((rand() % 100) + 1 <= 15) {
-                grid[i][j] = 'm';
-                num_uncovered++;
-                uncovered[i][j] = 2;
+            switch (difficulty) {
+                case 1:
+                    if ((rand() % 100) + 1 <= 10) {
+                        grid[i][j] = 'm';
+                        num_uncovered++;
+                        uncovered[i][j] = 2;
+                    }
+
+                    break;
+                case 2:
+                    if ((rand() % 100) + 1 <= 15) {
+                        grid[i][j] = 'm';
+                        num_uncovered++;
+                        uncovered[i][j] = 2;
+                    }
+
+                    break;
+                case 3:
+                    if ((rand() % 100) + 1 <= 20) {
+                        grid[i][j] = 'm';
+                        num_uncovered++;
+                        uncovered[i][j] = 2;
+                    }
+
+                    break;
+                case 4:
+                    if ((rand() % 100) + 1 <= 25) {
+                        grid[i][j] = 'm';
+                        num_uncovered++;
+                        uncovered[i][j] = 2;
+                    }
+
+                    break;
             }
         }
     }
@@ -84,34 +133,55 @@ void calc_for_tile(vector<vector<char> >& grid) {
                         grid[i][j]++;
                     }
                 }
-
-                if (grid[i][j] == 'm') {
-                    grid[i][j]++;
-                }
             }
         }
     }
 }
 
-int uncover(int a, int b, vector<vector<char> > grid, vector<vector<int> > &uncovered) {
-    uncovered[a][b] = 1;
-    if (grid[a][b] == 'm') {
-        return 1;
+void flag(int a, int b, vector<vector<int> > &flagged) {
+    if (flagged[a][b] != 1 && flagged[a][b] != 3) {
+        flagged[a][b] = 3;
+    } else if (flagged[a][b] == 3) {
+        flagged[a][b] = 0;
+    } else {
+        cout << "Unable to flag specified coordinates\n";
     }
+}
 
-    num_uncovered++;
+int uncover(int a, int b, vector<vector<char> > grid, vector<vector<int> > &uncovered) {
+    if (uncovered[a][b] != 3 && uncovered[a][b] != 1) {
+        uncovered[a][b] = 1;
+        if (grid[a][b] == 'm') {
+            return 1;
+        }
+
+        num_uncovered++;
+        return 0;
+    } else {
+        cout << "Unable to uncover specified coordinates. That cell may already be uncovered, or it may be flagged. Remove the flag first to uncover.\n";
+    }
     return 0;
 }
 
 int main() {
+    instructions();
     srand(time(0));
+    string command;
     bool win = false;
     int a, b, grid_size;
 
-    cout << "How large would you like the side of the grid to be, from 3-20?\n";
+    cout << "Enter your difficulty as an integer, from 1 (easiest) to 4 (hardest): ";
+    cin >> difficulty;
+
+    while (difficulty < 1 || difficulty > 4) {
+        cout << "Invalid input (try again): ";
+        cin >> difficulty;
+    }
+
+    cout << "How large would you like the side of the grid to be, from 3-25?\n";
     cin >> grid_size;
 
-    while (grid_size < 3 || grid_size > 20) {
+    while (grid_size < 3 || grid_size > 25) {
         cout << "Invalid input (try again): ";
         cin >> grid_size;
     }
@@ -119,17 +189,17 @@ int main() {
     vector<vector<char> > grid(grid_size, vector<char>(grid_size, '0'));
     vector<vector<int> > uncovered(grid_size, vector<int>(grid_size, 0));
 
-    setup(grid, uncovered);
+    setup(grid, uncovered, difficulty);
     calc_for_tile(grid);
 
 
     display_grid(grid, uncovered);
-    cout << "Enter coordinates of where you want to uncover (integers seperated by a single space): ";
-    cin >> a >> b;
+    cout << "Enter coordinates of where you want to uncover (keyword uc) or flag (keyword fl): ";
+    cin >> command >> a >> b;
 
-    while (a < 1 || b < 1 || a > grid_size || b > grid_size) {
+    while (a > grid_size || b > grid_size || a < 1 || b < 1) {
         cout << "Invalid coordinates, please try again: ";
-        cin >> a >> b;
+        cin >> command >> a >> b;
     }
 
     a--;
@@ -139,19 +209,29 @@ int main() {
         win = true;
     }
     
-    while (uncover(a, b, grid, uncovered) == 0 && (!win)) {
+    while (!win) {
+        if (command == "uc") {
+            if (uncover(a, b, grid, uncovered) == 1) {
+                break;
+            };
+        } else if (command == "fl") {
+            flag(a, b, uncovered);
+        } else {
+            cout << "Command not recognised\n";
+        }
+
         if (num_uncovered == (grid_size) * (grid_size)) {
             win = true;
             break;
         }
 
         display_grid(grid, uncovered);
-        cout << "Enter coordinates of where you want to uncover (integers seperated by a single space): ";
-        cin >> a >> b;
+        cout << "Enter coordinates of where you want to uncover (keyword uc) or flag (keyword fl): ";
+        cin >> command >> a >> b;
 
         while (a < 1 || b < 1 || a > grid_size || b > grid_size) {
             cout << "Invalid coordinates, please try again: ";
-            cin >> a >> b;
+            cin >> command >> a >> b;
         }
 
         a--;
