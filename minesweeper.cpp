@@ -1,4 +1,5 @@
 #include <iostream>
+#include <limits>
 #include <vector>
 #include <cstdlib>
 #include <ctime>
@@ -13,7 +14,7 @@ void instructions() {
     cout << "1. The grid consists of tiles, some of which contain mines ('m') and others are empty.\n";
     cout << "2. Your goal is to uncover all the tiles that don't contain mines.\n";
     cout << "3. The numbers on uncovered tiles represent how many mines are adjacent to that tile (including diagonals).\n";
-    cout << "4. You can uncover a tile by entering its coordinates.\n";
+    cout << "4. You can uncover a tile by entering the command 'uc its coordinates.\n";
     cout << "5. If you uncover a tile with a mine, you lose the game!\n\n";
     cout << "Flagging:\n";
     cout << "1. If you think a tile contains a mine, you can flag it to mark it.\n";
@@ -77,6 +78,12 @@ void setup(vector<vector<char> >& grid, vector<vector<int> >& uncovered, int dif
                     }
 
                     break;
+                case 5:
+                    if ((rand() % 100) + 1 <= 30) {
+                        grid[i][j] = 'm';
+                        num_uncovered++;
+                        uncovered[i][j] = 2;
+                    }
             }
         }
     }
@@ -170,19 +177,23 @@ int main() {
     bool win = false;
     int a, b, grid_size;
 
-    cout << "Enter your difficulty as an integer, from 1 (easiest) to 4 (hardest): ";
+    cout << "Enter your difficulty as an integer, from 1 (easiest) to 5 (hardest): ";
     cin >> difficulty;
 
-    while (difficulty < 1 || difficulty > 4) {
+    while (cin.fail() || difficulty < 1 || difficulty > 5) {
         cout << "Invalid input (try again): ";
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cin >> difficulty;
     }
 
     cout << "How large would you like the side of the grid to be, from 3-25?\n";
     cin >> grid_size;
 
-    while (grid_size < 3 || grid_size > 25) {
+    while (cin.fail() || grid_size < 3 || grid_size > 25) {
         cout << "Invalid input (try again): ";
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cin >> grid_size;
     }
 
@@ -197,8 +208,10 @@ int main() {
     cout << "Enter coordinates of where you want to uncover (keyword uc) or flag (keyword fl): ";
     cin >> command >> a >> b;
 
-    while (a > grid_size || b > grid_size || a < 1 || b < 1) {
+    while (cin.fail() || a > grid_size || b > grid_size || a < 1 || b < 1) {
         cout << "Invalid coordinates, please try again: ";
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cin >> command >> a >> b;
     }
 
@@ -226,11 +239,14 @@ int main() {
         }
 
         display_grid(grid, uncovered);
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cout << "Enter coordinates of where you want to uncover (keyword uc) or flag (keyword fl): ";
         cin >> command >> a >> b;
 
-        while (a < 1 || b < 1 || a > grid_size || b > grid_size) {
+        while (cin.fail() || a < 1 || b < 1 || a > grid_size || b > grid_size) {
             cout << "Invalid coordinates, please try again: ";
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
             cin >> command >> a >> b;
         }
 
@@ -239,6 +255,12 @@ int main() {
     }
 
     if (win) {
+        for (int i = 0; i < grid_size; i++) {
+            for (int j = 0; j < grid_size; j++) {
+                uncovered[i][j] = 1;
+            }
+        }
+
         display_grid(grid, uncovered);
         cout << "Congratulations you won!\n";
     } else {
