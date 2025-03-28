@@ -1,5 +1,5 @@
 # Minesweeper
-A compact version of the popular game used on command line.
+A compact version of the popular game built for command line.
 # Installation
 Clone the repository with 
 ```git clone https://github.com/wilsonwei123/minesweeper```. 
