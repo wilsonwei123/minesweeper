@@ -15,7 +15,7 @@ void instructions() {
     cout << "2. Your goal is to uncover all the tiles that don't contain mines.\n";
     cout << "3. The numbers on uncovered tiles represent how many mines are adjacent to that tile (including diagonals).\n";
     cout << "4. You can uncover a tile by entering the command 'uc its coordinates.\n";
-    cout << "5. If you uncover a tile with a mine, you lose the game!\n\n";
+    cout << "5. If you uncover a tile with a mine, you lose the game! (the first tile uncovered will never be a mine)\n\n";
     cout << "Flagging:\n";
     cout << "1. If you think a tile contains a mine, you can flag it to mark it.\n";
     cout << "2. Flags are a way to keep track of tiles you suspect contain mines.\n";
@@ -42,9 +42,12 @@ void display_grid(vector<vector<char> > &grid, vector<vector<int> > &uncovered) 
     }
 }
 
-void setup(vector<vector<char> >& grid, vector<vector<int> >& uncovered, int difficulty) {
+void setup(vector<vector<char> >& grid, vector<vector<int> >& uncovered, int difficulty, int a, int b) {
     for (int i = 0; i < grid.size(); i++) {
         for (int j = 0; j < grid[0].size(); j++) {
+            if (i == a - 1 && j == b - 1) {
+                break;
+            }
             switch (difficulty) {
                 case 1:
                     if ((rand() % 100) + 1 <= 10) {
@@ -170,6 +173,27 @@ int uncover(int a, int b, vector<vector<char> > grid, vector<vector<int> > &unco
     return 0;
 }
 
+vector<int> first_turn(int grid_size) {
+    int a, b;
+    for (int i = 0; i < grid_size; i++) {
+        for (int j = 0; j < grid_size; j++) {
+            cout << "# ";
+        }
+        cout << "\n";
+    }
+
+    cout << "Enter coordinates to uncover (this one will not be a mine): ";
+    cin >> a >> b;
+    while (cin.fail() || a < 1 || a > grid_size || b < 1 || b > grid_size) {
+        cout << "Invalid input (try again): ";
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cin >> a >> b;
+    }
+
+    return {a, b};
+}
+
 int main() {
     instructions();
     srand(time(0));
@@ -197,12 +221,13 @@ int main() {
         cin >> grid_size;
     }
 
-    vector<vector<char> > grid(grid_size, vector<char>(grid_size, '0'));
+    vector<vector<char> > grid(grid_size, vector<char>(grid_size, '#'));
     vector<vector<int> > uncovered(grid_size, vector<int>(grid_size, 0));
 
-    setup(grid, uncovered, difficulty);
-    calc_for_tile(grid);
+    vector<int> starting_co = first_turn(grid_size);
 
+    setup(grid, uncovered, difficulty, starting_co[0], starting_co[1]);
+    calc_for_tile(grid);
 
     display_grid(grid, uncovered);
     cout << "Enter coordinates of where you want to uncover (keyword uc) or flag (keyword fl): ";
