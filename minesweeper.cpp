@@ -46,7 +46,7 @@ void setup(vector<vector<char> >& grid, vector<vector<int> >& uncovered, int dif
     for (int i = 0; i < grid.size(); i++) {
         for (int j = 0; j < grid[0].size(); j++) {
             if (i == a - 1 && j == b - 1) {
-                break;
+                continue;
             }
             switch (difficulty) {
                 case 1:
@@ -182,7 +182,7 @@ vector<int> first_turn(int grid_size) {
         cout << "\n";
     }
 
-    cout << "Enter coordinates to uncover (this one will not be a mine): ";
+    cout << "Enter coordinates to uncover (this one will not be a mine; do not include uc): ";
     cin >> a >> b;
     while (cin.fail() || a < 1 || a > grid_size || b < 1 || b > grid_size) {
         cout << "Invalid input (try again): ";
@@ -221,11 +221,12 @@ int main() {
         cin >> grid_size;
     }
 
-    vector<vector<char> > grid(grid_size, vector<char>(grid_size, '#'));
+    vector<vector<char> > grid(grid_size, vector<char>(grid_size, '0'));
     vector<vector<int> > uncovered(grid_size, vector<int>(grid_size, 0));
 
     vector<int> starting_co = first_turn(grid_size);
 
+    uncovered[starting_co[0] - 1][starting_co[1] - 1] = 1;
     setup(grid, uncovered, difficulty, starting_co[0], starting_co[1]);
     calc_for_tile(grid);
 
